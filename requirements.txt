@@ -1,0 +1,6 @@
+fastapi>=0.100
+uvicorn>=0.23
+pandas>=1.5
+numpy>=1.23
+scipy>=1.9
+scikit-learn>=1.2

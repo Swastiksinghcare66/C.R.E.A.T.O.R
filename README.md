@@ -1,5 +1,24 @@
-1. Since it is a project from track open innovation what ever file is uploaded is just a dummy demonstration which can be scaled at indusrty level.
-2. untitled_1 --use this file to see datapreprocessing Toolkit.  (please ignore ml-preprocessing file)
-3. DEVSOC -- folder contain ml algorithm recommender system with a test dataset to use it.
+# Scalable Statistical EDA Engine (Phase 1–3)
 
-   For the toolkit we appologize that we couldn't maintain proper standards of web dev. This was becasue our web developer couldn't join us because of illness.
+## Overview
+This project provides a FastAPI-based statistical EDA engine that:
+- Infers problem type (classification vs regression)
+- Extracts cheap but powerful statistical signals
+- Scores and filters model families
+- Scales safely to large datasets
+
+## Run
+```bash
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
+
+## Endpoint
+POST `/eda/phase1-3`
+- file: CSV
+- target_column: name of target
+
+## Future Scope
+- Phase 4: Auto feature engineering
+- Phase 5: Confidence-weighted model ranking
+- Phase 6: Supervising agent (adaptive tuning)
