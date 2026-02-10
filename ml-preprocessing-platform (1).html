@@ -1,0 +1,2104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C.R.E.A.T.O.R - ML Intelligence Platform</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --night: #0a0e27;
+            --deep-blue: #1a1f3a;
+            --ocean: #2d4263;
+            --teal: #00d4aa;
+            --electric: #00ffcc;
+            --coral: #ff6b6b;
+            --gold: #ffd93d;
+            --silver: #c8d6e5;
+            --frost: #f8f9fa;
+            --gradient-primary: linear-gradient(135deg, #00d4aa 0%, #00a8cc 100%);
+            --gradient-warm: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
+            --gradient-cool: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.15);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.2);
+            --shadow-glow: 0 0 20px rgba(0, 212, 170, 0.3);
+        }
+
+        body {
+            font-family: 'Archivo', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--night);
+            color: var(--frost);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .background-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: var(--night);
+        }
+
+        .background-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(0, 212, 170, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(102, 126, 234, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(255, 107, 107, 0.05) 0%, transparent 70%);
+            animation: gradientShift 20s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.1); }
+        }
+
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 212, 170, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 170, 0.03) 1px, transparent 1px);
+            background-size: 80px 80px;
+            z-index: -1;
+            animation: gridPulse 8s ease-in-out infinite;
+        }
+
+        @keyframes gridPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Container */
+        .app-container {
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 4rem 0 3rem;
+            position: relative;
+        }
+
+        .logo-container {
+            display: inline-block;
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .logo-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(0, 212, 170, 0.4), transparent 70%);
+            filter: blur(40px);
+            animation: logoGlow 4s ease-in-out infinite;
+        }
+
+        @keyframes logoGlow {
+            0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+        }
+
+        .header h1 {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 5rem;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, var(--electric), var(--teal), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            animation: titleSlide 1s cubic-bezier(0.16, 1, 0.3, 1);
+            text-shadow: 0 0 80px rgba(0, 212, 170, 0.5);
+        }
+
+        @keyframes titleSlide {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header .subtitle {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.5rem;
+            color: var(--silver);
+            font-style: italic;
+            margin-top: 0.5rem;
+            animation: fadeIn 1s ease 0.3s both;
+        }
+
+        .header .tagline {
+            color: var(--teal);
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            margin-top: 1rem;
+            animation: fadeIn 1s ease 0.5s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Tab Navigation */
+        .tab-navigation {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            padding: 0.5rem;
+            background: rgba(26, 31, 58, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(0, 212, 170, 0.1);
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tab-btn {
+            padding: 1rem 2.5rem;
+            background: transparent;
+            border: 2px solid transparent;
+            border-radius: 15px;
+            color: var(--silver);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-primary);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .tab-btn:hover::before {
+            left: 0;
+        }
+
+        .tab-btn:hover {
+            color: white;
+            border-color: var(--teal);
+            transform: translateY(-2px);
+        }
+
+        .tab-btn.active {
+            background: var(--gradient-primary);
+            color: white;
+            border-color: var(--teal);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .tab-btn.active::before {
+            left: 0;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            background: rgba(26, 31, 58, 0.8);
+            backdrop-filter: blur(20px);
+            border: 2px dashed rgba(0, 212, 170, 0.3);
+            border-radius: 24px;
+            padding: 4rem 3rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 212, 170, 0.1), transparent 50%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .upload-section:hover::before {
+            opacity: 1;
+        }
+
+        .upload-section:hover {
+            border-color: var(--teal);
+            background: rgba(26, 31, 58, 0.95);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg), var(--shadow-glow);
+        }
+
+        .upload-section.drag-over {
+            border-color: var(--electric);
+            background: rgba(0, 212, 170, 0.1);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .upload-section h3 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Buttons */
+        .btn {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'Archivo', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg), 0 0 30px rgba(0, 212, 170, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: rgba(200, 214, 229, 0.1);
+            border: 2px solid var(--silver);
+            color: var(--silver);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(200, 214, 229, 0.2);
+            border-color: var(--teal);
+            color: var(--teal);
+        }
+
+        .btn-danger {
+            background: var(--gradient-warm);
+        }
+
+        /* Main Content Layout */
+        .main-content {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 2rem;
+            animation: fadeIn 0.8s ease;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: rgba(26, 31, 58, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 2rem;
+            height: fit-content;
+            position: sticky;
+            top: 2rem;
+            max-height: calc(100vh - 4rem);
+            overflow-y: auto;
+            border: 1px solid rgba(0, 212, 170, 0.2);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(10, 14, 39, 0.5);
+            border-radius: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--gradient-primary);
+            border-radius: 4px;
+        }
+
+        .sidebar h3 {
+            font-family: 'IBM Plex Mono', monospace;
+            color: var(--teal);
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .tool-category {
+            margin-bottom: 1.5rem;
+        }
+
+        .category-header {
+            background: rgba(45, 66, 99, 0.5);
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            font-weight: 700;
+            border: 1px solid transparent;
+        }
+
+        .category-header:hover {
+            background: rgba(45, 66, 99, 0.8);
+            border-color: var(--teal);
+            transform: translateX(4px);
+        }
+
+        .category-header.active {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .expand-icon {
+            transition: transform 0.3s ease;
+            font-size: 0.8rem;
+        }
+
+        .expand-icon.expanded {
+            transform: rotate(90deg);
+        }
+
+        .tool-list {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .tool-list.expanded {
+            max-height: 800px;
+        }
+
+        .tool-item {
+            padding: 0.75rem 1.25rem;
+            margin: 0.5rem 0 0.5rem 1.5rem;
+            border-left: 3px solid rgba(0, 212, 170, 0.3);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--silver);
+            border-radius: 0 8px 8px 0;
+            font-weight: 500;
+        }
+
+        .tool-item:hover {
+            color: var(--teal);
+            border-left-color: var(--teal);
+            transform: translateX(6px);
+            background: rgba(0, 212, 170, 0.05);
+        }
+
+        .tool-item.active {
+            color: var(--electric);
+            border-left-color: var(--electric);
+            background: rgba(0, 212, 170, 0.15);
+            font-weight: 700;
+        }
+
+        /* Workspace */
+        .workspace {
+            background: rgba(26, 31, 58, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 2.5rem;
+            min-height: 700px;
+            border: 1px solid rgba(0, 212, 170, 0.2);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Dataset Info */
+        .dataset-info {
+            background: rgba(10, 14, 39, 0.8);
+            padding: 2rem;
+            border-radius: 16px;
+            margin-bottom: 2.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            border: 1px solid rgba(0, 212, 170, 0.1);
+        }
+
+        .info-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(26, 31, 58, 0.5);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .info-item:hover {
+            transform: translateY(-4px);
+            border-color: var(--teal);
+            box-shadow: var(--shadow-md);
+        }
+
+        .info-label {
+            color: var(--silver);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-size: 2rem;
+            font-weight: 900;
+            font-family: 'IBM Plex Mono', monospace;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ML Predictor */
+        .ml-predictor {
+            background: rgba(10, 14, 39, 0.6);
+            padding: 2.5rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            border: 2px solid rgba(0, 212, 170, 0.2);
+        }
+
+        .ml-predictor h3 {
+            font-family: 'IBM Plex Mono', monospace;
+            color: var(--teal);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .predictor-config {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.75rem;
+            color: var(--silver);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        .form-group select,
+        .form-group input[type="number"],
+        .form-group input[type="text"] {
+            width: 100%;
+            background: rgba(26, 31, 58, 0.8);
+            border: 2px solid rgba(0, 212, 170, 0.2);
+            color: var(--frost);
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: 'Archivo', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--teal);
+            box-shadow: 0 0 0 4px rgba(0, 212, 170, 0.1);
+            background: rgba(26, 31, 58, 1);
+        }
+
+        /* Recommendations Display */
+        .recommendations {
+            background: linear-gradient(135deg, rgba(0, 212, 170, 0.1), rgba(102, 126, 234, 0.1));
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 2px solid rgba(0, 212, 170, 0.3);
+            margin-top: 2rem;
+        }
+
+        .recommendations h4 {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .learning-type {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: var(--gradient-cool);
+            color: white;
+            border-radius: 12px;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .algorithm-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .algorithm-card {
+            background: rgba(26, 31, 58, 0.9);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border-left: 4px solid var(--teal);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .algorithm-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 170, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .algorithm-card:hover::before {
+            left: 100%;
+        }
+
+        .algorithm-card:hover {
+            transform: translateY(-6px);
+            border-left-color: var(--electric);
+            box-shadow: var(--shadow-lg), 0 0 30px rgba(0, 212, 170, 0.2);
+        }
+
+        .algorithm-card h5 {
+            color: var(--teal);
+            font-size: 1.2rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .algorithm-card p {
+            color: var(--silver);
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .algorithm-badge {
+            display: inline-block;
+            padding: 0.4rem 0.9rem;
+            background: rgba(0, 212, 170, 0.2);
+            color: var(--teal);
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 0.75rem;
+        }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+            margin: 2rem 0;
+            border-radius: 16px;
+            border: 1px solid rgba(0, 212, 170, 0.2);
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        th {
+            background: rgba(10, 14, 39, 0.95);
+            color: var(--teal);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+            font-family: 'IBM Plex Mono', monospace;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            z-index: 10;
+        }
+
+        td {
+            padding: 1rem;
+            border-top: 1px solid rgba(0, 212, 170, 0.1);
+            color: var(--silver);
+        }
+
+        tr:hover {
+            background: rgba(0, 212, 170, 0.05);
+        }
+
+        /* Stats Card */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: rgba(10, 14, 39, 0.6);
+            padding: 2rem;
+            border-radius: 16px;
+            border-left: 4px solid var(--teal);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-left-color: var(--electric);
+        }
+
+        .stat-card h5 {
+            color: var(--silver);
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .stat-card .value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            font-family: 'IBM Plex Mono', monospace;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 1.25rem 1.75rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 600;
+            animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .alert-success {
+            background: rgba(0, 212, 170, 0.15);
+            border: 2px solid var(--teal);
+            color: var(--electric);
+        }
+
+        .alert-warning {
+            background: rgba(255, 211, 61, 0.15);
+            border: 2px solid var(--gold);
+            color: var(--gold);
+        }
+
+        .alert-error {
+            background: rgba(255, 107, 107, 0.15);
+            border: 2px solid var(--coral);
+            color: var(--coral);
+        }
+
+        .alert-info {
+            background: rgba(102, 126, 234, 0.15);
+            border: 2px solid #667eea;
+            color: #a3b3ff;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 5rem 2rem;
+            color: var(--silver);
+        }
+
+        .empty-state-icon {
+            font-size: 6rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.3;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .empty-state h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--teal);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 2.5rem;
+            padding-top: 2rem;
+            border-top: 2px solid rgba(0, 212, 170, 0.1);
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+                max-height: none;
+            }
+
+            .header h1 {
+                font-size: 3.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .tab-navigation {
+                flex-wrap: wrap;
+            }
+
+            .tab-btn {
+                padding: 0.75rem 1.5rem;
+                font-size: 0.9rem;
+            }
+
+            .algorithm-grid,
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background: rgba(10, 14, 39, 0.6);
+            padding: 2rem;
+            border-radius: 16px;
+            margin: 2rem 0;
+            border: 1px solid rgba(0, 212, 170, 0.2);
+        }
+
+        .chart-container canvas {
+            max-height: 400px;
+        }
+
+        /* Config Panel */
+        .config-panel {
+            background: rgba(10, 14, 39, 0.6);
+            padding: 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(0, 212, 170, 0.2);
+        }
+
+        .config-panel h4 {
+            color: var(--teal);
+            margin-bottom: 1.5rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.2rem;
+        }
+
+        /* Checkbox Group */
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            color: var(--silver);
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .checkbox-label:hover {
+            color: var(--teal);
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--teal);
+        }
+
+        /* Feature Pills */
+        .feature-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+        }
+
+        .feature-pill {
+            padding: 0.5rem 1rem;
+            background: rgba(0, 212, 170, 0.1);
+            border: 1px solid var(--teal);
+            border-radius: 20px;
+            color: var(--teal);
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .feature-pill:hover {
+            background: rgba(0, 212, 170, 0.2);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="background-canvas"></div>
+    <div class="background-gradient"></div>
+    <div class="grid-overlay"></div>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Tools Configuration (from original code)
+        const toolsConfig = {
+            eda: {
+                name: "Exploratory Data Analysis",
+                icon: "📊",
+                tools: [
+                    { id: "overview", name: "Dataset Overview" },
+                    { id: "statistics", name: "Statistical Summary" },
+                    { id: "missing", name: "Missing Values Analysis" },
+                    { id: "correlation", name: "Correlation Matrix" },
+                    { id: "distribution", name: "Distribution Analysis" },
+                    { id: "outliers", name: "Outlier Detection" }
+                ]
+            },
+            imputation: {
+                name: "Missing Value Imputation",
+                icon: "🔧",
+                tools: [
+                    { id: "mean", name: "Mean Imputation" },
+                    { id: "median", name: "Median Imputation" },
+                    { id: "mode", name: "Mode Imputation" },
+                    { id: "constant", name: "Constant Value" },
+                    { id: "ffill", name: "Forward Fill" },
+                    { id: "bfill", name: "Backward Fill" }
+                ]
+            },
+            encoding: {
+                name: "Categorical Encoding",
+                icon: "🏷️",
+                tools: [
+                    { id: "label", name: "Label Encoding" },
+                    { id: "onehot", name: "One-Hot Encoding" },
+                    { id: "ordinal", name: "Ordinal Encoding" },
+                    { id: "frequency", name: "Frequency Encoding" }
+                ]
+            },
+            scaling: {
+                name: "Feature Scaling",
+                icon: "⚖️",
+                tools: [
+                    { id: "standard", name: "Standard Scaler" },
+                    { id: "minmax", name: "MinMax Scaler" },
+                    { id: "robust", name: "Robust Scaler" },
+                    { id: "normalizer", name: "Normalizer" }
+                ]
+            },
+            transformation: {
+                name: "Feature Transformation",
+                icon: "🔄",
+                tools: [
+                    { id: "log", name: "Log Transformation" },
+                    { id: "sqrt", name: "Square Root" },
+                    { id: "power", name: "Power Transformation" }
+                ]
+            },
+            cleaning: {
+                name: "Data Cleaning",
+                icon: "🧹",
+                tools: [
+                    { id: "duplicates", name: "Remove Duplicates" },
+                    { id: "outliers-clean", name: "Handle Outliers" },
+                    { id: "convert-types", name: "Type Conversion" },
+                    { id: "rename", name: "Rename Columns" }
+                ]
+            }
+        };
+
+        // ML Algorithm Recommender Class (converted to JavaScript)
+        class MLAlgorithmRecommender {
+            constructor(data, targetColumn = null) {
+                this.data = data;
+                this.target = targetColumn;
+            }
+
+            inspectData() {
+                const info = {};
+                
+                info.n_samples = this.data.length;
+                info.n_features = Object.keys(this.data[0] || {}).length;
+                
+                // Calculate missing ratio
+                let totalCells = 0;
+                let missingCells = 0;
+                this.data.forEach(row => {
+                    Object.values(row).forEach(val => {
+                        totalCells++;
+                        if (val === null || val === undefined || val === '') missingCells++;
+                    });
+                });
+                info.missing_ratio = missingCells / totalCells;
+                
+                // Identify numeric and categorical columns
+                const columns = Object.keys(this.data[0] || {});
+                const numericCols = columns.filter(col => 
+                    this.data.some(row => typeof row[col] === 'number')
+                );
+                const categoricalCols = columns.filter(col => 
+                    this.data.some(row => typeof row[col] === 'string')
+                );
+                
+                info.numeric_ratio = numericCols.length / info.n_features;
+                info.categorical_ratio = categoricalCols.length / info.n_features;
+                info.high_dimensional = info.n_features > 50;
+                info.large_dataset = info.n_samples > 100000;
+                
+                return info;
+            }
+
+            determineLearningType() {
+                if (!this.target || this.data.length === 0) {
+                    return "Unsupervised";
+                }
+                return "Supervised";
+            }
+
+            supervisedTask() {
+                if (!this.target) return null;
+                
+                const targetValues = this.data.map(row => row[this.target]).filter(v => v !== null && v !== undefined);
+                const uniqueValues = [...new Set(targetValues)];
+                
+                // If target is string or has fewer than 15 unique values, it's classification
+                const isString = targetValues.some(v => typeof v === 'string');
+                if (isString || uniqueValues.length < 15) {
+                    return "Classification";
+                } else {
+                    return "Regression";
+                }
+            }
+
+            recommendAlgorithms() {
+                const info = this.inspectData();
+                const learningType = this.determineLearningType();
+                const recommendations = [];
+
+                if (learningType === "Supervised") {
+                    const task = this.supervisedTask();
+
+                    if (task === "Classification") {
+                        recommendations.push(
+                            { name: "Logistic Regression", description: "Simple baseline classifier", category: "baseline" },
+                            { name: "Random Forest", description: "Robust ensemble method", category: "robust" },
+                            { name: "Support Vector Machine", description: "Effective for small-medium datasets", category: "medium-data" },
+                            { name: "K-Nearest Neighbors", description: "Good for low-dimensional data", category: "low-dim" },
+                            { name: "Naive Bayes", description: "Fast probabilistic classifier", category: "probabilistic" }
+                        );
+
+                        if (info.high_dimensional) {
+                            recommendations.push({ name: "Linear SVM", description: "Handles high dimensions well", category: "high-dim" });
+                        }
+
+                        if (info.large_dataset) {
+                            recommendations.push({ name: "XGBoost / LightGBM", description: "Gradient boosting for large data", category: "large-data" });
+                        }
+                    } else if (task === "Regression") {
+                        recommendations.push(
+                            { name: "Linear Regression", description: "Simple baseline regressor", category: "baseline" },
+                            { name: "Lasso Regression", description: "With feature selection", category: "feature-selection" },
+                            { name: "Ridge Regression", description: "Handles multicollinearity", category: "regularized" },
+                            { name: "Random Forest Regressor", description: "Robust ensemble for regression", category: "robust" },
+                            { name: "Support Vector Regressor", description: "Non-linear relationships", category: "non-linear" }
+                        );
+
+                        if (info.large_dataset) {
+                            recommendations.push({ name: "XGBoost Regressor", description: "Gradient boosting regressor", category: "large-data" });
+                        }
+                    }
+                } else {
+                    // Unsupervised
+                    if (info.high_dimensional) {
+                        recommendations.push({ name: "PCA", description: "Dimensionality reduction", category: "dim-reduction" });
+                    }
+
+                    if (info.numeric_ratio > 0.7) {
+                        recommendations.push(
+                            { name: "K-Means Clustering", description: "Partition-based clustering", category: "clustering" },
+                            { name: "DBSCAN", description: "Density-based clustering", category: "clustering" }
+                        );
+                    }
+
+                    if (info.missing_ratio > 0.05) {
+                        recommendations.push({ name: "Isolation Forest", description: "Anomaly detection", category: "anomaly" });
+                    }
+
+                    recommendations.push(
+                        { name: "Hierarchical Clustering", description: "Tree-based clustering", category: "clustering" },
+                        { name: "Association Rules", description: "Pattern discovery (Apriori/FP-Growth)", category: "pattern" }
+                    );
+                }
+
+                return {
+                    learning_type: learningType,
+                    task: learningType === "Supervised" ? this.supervisedTask() : null,
+                    recommended_algorithms: recommendations,
+                    dataset_info: info
+                };
+            }
+        }
+
+        // Main App Component
+        function App() {
+            const [data, setData] = useState(null);
+            const [originalData, setOriginalData] = useState(null);
+            const [activeTab, setActiveTab] = useState('preprocessing');
+            const [selectedCategory, setSelectedCategory] = useState(null);
+            const [selectedTool, setSelectedTool] = useState(null);
+            const [expandedCategories, setExpandedCategories] = useState({});
+            const [mlRecommendations, setMlRecommendations] = useState(null);
+            const [targetColumn, setTargetColumn] = useState('');
+            const fileInputRef = useRef(null);
+
+            const handleFileUpload = (file) => {
+                if (file) {
+                    Papa.parse(file, {
+                        header: true,
+                        dynamicTyping: true,
+                        complete: (results) => {
+                            setData(results.data);
+                            setOriginalData(JSON.parse(JSON.stringify(results.data)));
+                            setSelectedTool(null);
+                            setMlRecommendations(null);
+                        },
+                        error: (error) => {
+                            alert("Error parsing file: " + error.message);
+                        }
+                    });
+                }
+            };
+
+            const handleDrop = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const file = e.dataTransfer.files[0];
+                if (file) handleFileUpload(file);
+            };
+
+            const handleDragOver = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            };
+
+            const loadSampleData = () => {
+                const sampleData = [
+                    { age: 25, salary: 50000, department: 'Sales', experience: 2, rating: 4.2, promoted: 'No' },
+                    { age: 30, salary: 65000, department: 'IT', experience: 5, rating: 4.5, promoted: 'Yes' },
+                    { age: null, salary: 55000, department: 'HR', experience: 3, rating: null, promoted: 'No' },
+                    { age: 28, salary: null, department: 'Sales', experience: 4, rating: 3.8, promoted: 'No' },
+                    { age: 35, salary: 80000, department: 'IT', experience: 8, rating: 4.7, promoted: 'Yes' },
+                    { age: 22, salary: 45000, department: 'Marketing', experience: 1, rating: 3.9, promoted: 'No' },
+                    { age: 40, salary: 95000, department: 'IT', experience: 12, rating: 4.8, promoted: 'Yes' },
+                    { age: 27, salary: 58000, department: 'HR', experience: null, rating: 4.1, promoted: 'No' },
+                    { age: 32, salary: 72000, department: 'Sales', experience: 6, rating: 4.4, promoted: 'Yes' },
+                    { age: 29, salary: 62000, department: 'Marketing', experience: 4, rating: null, promoted: 'No' }
+                ];
+                setData(sampleData);
+                setOriginalData(JSON.parse(JSON.stringify(sampleData)));
+            };
+
+            const toggleCategory = (categoryKey) => {
+                setExpandedCategories(prev => ({
+                    ...prev,
+                    [categoryKey]: !prev[categoryKey]
+                }));
+            };
+
+            const selectTool = (categoryKey, toolId) => {
+                setSelectedCategory(categoryKey);
+                setSelectedTool(toolId);
+            };
+
+            const downloadData = () => {
+                if (!data) return;
+                const csv = Papa.unparse(data);
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'processed_data.csv';
+                a.click();
+                URL.revokeObjectURL(url);
+            };
+
+            const predictMLAlgorithm = () => {
+                if (!data) return;
+                
+                const recommender = new MLAlgorithmRecommender(data, targetColumn || null);
+                const result = recommender.recommendAlgorithms();
+                setMlRecommendations(result);
+            };
+
+            return (
+                <div className="app-container">
+                    <header className="header">
+                        <div className="logo-container">
+                            <div className="logo-glow"></div>
+                            <h1>C.R.E.A.T.O.R</h1>
+                        </div>
+                        <p className="subtitle">Cognitive Runtime for Engineering Agent-based Technology Operations & Results</p>
+                        <p className="tagline">Data Preprocessing & ML Intelligence Platform</p>
+                    </header>
+
+                    {!data ? (
+                        <div 
+                            className="upload-section"
+                            onDrop={handleDrop}
+                            onDragOver={handleDragOver}
+                            onClick={() => fileInputRef.current?.click()}
+                        >
+                            <div className="upload-icon">📁</div>
+                            <h3>Upload Your Dataset</h3>
+                            <p style={{color: 'var(--silver)', marginTop: '1rem', fontSize: '1.1rem'}}>
+                                Drag & drop a CSV file or click to browse
+                            </p>
+                            <p style={{color: 'var(--silver)', fontSize: '0.95rem', marginTop: '1.5rem'}}>
+                                Supports CSV files • Instant preprocessing • AI-powered algorithm recommendations
+                            </p>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                className="file-input"
+                                accept=".csv"
+                                onChange={(e) => handleFileUpload(e.target.files[0])}
+                            />
+                            <div style={{marginTop: '2rem'}}>
+                                <button className="btn btn-secondary" onClick={(e) => {
+                                    e.stopPropagation();
+                                    loadSampleData();
+                                }}>
+                                    🎲 Load Sample Dataset
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="tab-navigation">
+                                <button 
+                                    className={`tab-btn ${activeTab === 'preprocessing' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('preprocessing')}
+                                >
+                                    🔧 Preprocessing
+                                </button>
+                                <button 
+                                    className={`tab-btn ${activeTab === 'ml-predictor' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('ml-predictor')}
+                                >
+                                    🤖 ML Algorithm Predictor
+                                </button>
+                            </div>
+
+                            {activeTab === 'preprocessing' ? (
+                                <div className="main-content">
+                                    <aside className="sidebar">
+                                        <h3>Tools</h3>
+                                        {Object.entries(toolsConfig).map(([key, category]) => (
+                                            <div key={key} className="tool-category">
+                                                <div 
+                                                    className={`category-header ${selectedCategory === key ? 'active' : ''}`}
+                                                    onClick={() => toggleCategory(key)}
+                                                >
+                                                    <span>{category.icon} {category.name}</span>
+                                                    <span className={`expand-icon ${expandedCategories[key] ? 'expanded' : ''}`}>
+                                                        ▶
+                                                    </span>
+                                                </div>
+                                                <div className={`tool-list ${expandedCategories[key] ? 'expanded' : ''}`}>
+                                                    {category.tools.map(tool => (
+                                                        <div 
+                                                            key={tool.id}
+                                                            className={`tool-item ${selectedTool === tool.id ? 'active' : ''}`}
+                                                            onClick={() => selectTool(key, tool.id)}
+                                                        >
+                                                            {tool.name}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </aside>
+
+                                    <main className="workspace">
+                                        <DatasetInfo data={data} />
+                                        {selectedTool ? (
+                                            <ToolWorkspace 
+                                                tool={selectedTool} 
+                                                category={selectedCategory}
+                                                data={data} 
+                                                setData={setData}
+                                                originalData={originalData}
+                                            />
+                                        ) : (
+                                            <div className="empty-state">
+                                                <div className="empty-state-icon">🎯</div>
+                                                <h3>Select a Tool to Get Started</h3>
+                                                <p>Choose a preprocessing technique from the sidebar to analyze and transform your data</p>
+                                            </div>
+                                        )}
+                                        <div className="action-buttons">
+                                            <button className="btn" onClick={downloadData}>
+                                                💾 Download Processed Data
+                                            </button>
+                                            <button className="btn btn-secondary" onClick={() => {
+                                                setData(null);
+                                                setSelectedTool(null);
+                                                setMlRecommendations(null);
+                                            }}>
+                                                🔄 Load New Dataset
+                                            </button>
+                                            <button className="btn btn-secondary" onClick={() => {
+                                                setData(JSON.parse(JSON.stringify(originalData)));
+                                            }}>
+                                                ↩️ Reset to Original
+                                            </button>
+                                        </div>
+                                    </main>
+                                </div>
+                            ) : (
+                                <div className="workspace" style={{maxWidth: '1400px', margin: '0 auto'}}>
+                                    <DatasetInfo data={data} />
+                                    
+                                    <div className="ml-predictor">
+                                        <h3>🤖 ML Algorithm Recommendation Engine</h3>
+                                        
+                                        <div className="predictor-config">
+                                            <div className="form-group">
+                                                <label>Target Column (Optional for Supervised Learning)</label>
+                                                <select 
+                                                    value={targetColumn} 
+                                                    onChange={(e) => setTargetColumn(e.target.value)}
+                                                >
+                                                    <option value="">-- None (Unsupervised) --</option>
+                                                    {Object.keys(data[0] || {}).map(col => (
+                                                        <option key={col} value={col}>{col}</option>
+                                                    ))}
+                                                </select>
+                                                <p style={{color: 'var(--silver)', fontSize: '0.85rem', marginTop: '0.5rem'}}>
+                                                    Select a target column for supervised learning, or leave empty for unsupervised
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <button className="btn" onClick={predictMLAlgorithm}>
+                                            ✨ Generate Algorithm Recommendations
+                                        </button>
+                                    </div>
+
+                                    {mlRecommendations && (
+                                        <MLRecommendations recommendations={mlRecommendations} />
+                                    )}
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
+            );
+        }
+
+        // Dataset Info Component
+        function DatasetInfo({ data }) {
+            if (!data || data.length === 0) return null;
+
+            const columns = Object.keys(data[0] || {});
+            const rows = data.length;
+            
+            const missingCount = data.reduce((acc, row) => {
+                Object.values(row).forEach(val => {
+                    if (val === null || val === undefined || val === '') acc++;
+                });
+                return acc;
+            }, 0);
+
+            const numericCols = columns.filter(col => {
+                return data.some(row => typeof row[col] === 'number');
+            });
+
+            return (
+                <div className="dataset-info">
+                    <div className="info-item">
+                        <div className="info-label">Rows</div>
+                        <div className="info-value">{rows.toLocaleString()}</div>
+                    </div>
+                    <div className="info-item">
+                        <div className="info-label">Columns</div>
+                        <div className="info-value">{columns.length}</div>
+                    </div>
+                    <div className="info-item">
+                        <div className="info-label">Missing Values</div>
+                        <div className="info-value">{missingCount}</div>
+                    </div>
+                    <div className="info-item">
+                        <div className="info-label">Numeric Columns</div>
+                        <div className="info-value">{numericCols.length}</div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ML Recommendations Component
+        function MLRecommendations({ recommendations }) {
+            const { learning_type, task, recommended_algorithms, dataset_info } = recommendations;
+
+            return (
+                <div className="recommendations">
+                    <h4>🎯 Recommended Machine Learning Algorithms</h4>
+                    
+                    <div style={{marginBottom: '2rem'}}>
+                        <span className="learning-type">
+                            {learning_type} Learning {task ? `• ${task}` : ''}
+                        </span>
+                    </div>
+
+                    <div className="alert alert-info">
+                        <span style={{fontSize: '1.5rem'}}>ℹ️</span>
+                        <div>
+                            <strong>Dataset Analysis:</strong> {dataset_info.n_samples} samples, {dataset_info.n_features} features • 
+                            {(dataset_info.missing_ratio * 100).toFixed(1)}% missing values • 
+                            {dataset_info.high_dimensional ? ' High-dimensional dataset' : ' Standard dimensionality'}
+                            {dataset_info.large_dataset ? ' • Large dataset' : ''}
+                        </div>
+                    </div>
+
+                    <div className="algorithm-grid">
+                        {recommended_algorithms.map((algo, idx) => (
+                            <div key={idx} className="algorithm-card">
+                                <h5>{algo.name}</h5>
+                                <p>{algo.description}</p>
+                                <span className="algorithm-badge">{algo.category}</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="alert alert-success" style={{marginTop: '2rem'}}>
+                        <span style={{fontSize: '1.5rem'}}>✅</span>
+                        <div>
+                            <strong>Next Steps:</strong> Start with baseline algorithms (like Logistic/Linear Regression), 
+                            then experiment with more complex models. Use cross-validation to compare performance.
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Tool Workspace Component
+        function ToolWorkspace({ tool, category, data, setData, originalData }) {
+            const [config, setConfig] = useState({});
+            const [result, setResult] = useState(null);
+
+            const getColumns = () => Object.keys(data[0] || {});
+            
+            const getNumericColumns = () => {
+                return getColumns().filter(col =>
+                    data.some(row => typeof row[col] === 'number')
+                );
+            };
+
+            const getCategoricalColumns = () => {
+                return getColumns().filter(col =>
+                    data.some(row => typeof row[col] === 'string')
+                );
+            };
+
+            const applySimpleImputation = (data, column, method) => {
+                const values = data.map(row => row[column]).filter(v => v !== null && v !== undefined && v !== '');
+                let fillValue;
+
+                if (method === 'mean') {
+                    fillValue = values.reduce((a, b) => a + b, 0) / values.length;
+                } else if (method === 'median') {
+                    const sorted = [...values].sort((a, b) => a - b);
+                    fillValue = sorted[Math.floor(sorted.length / 2)];
+                } else if (method === 'mode') {
+                    const freq = {};
+                    values.forEach(v => freq[v] = (freq[v] || 0) + 1);
+                    fillValue = Object.keys(freq).reduce((a, b) => freq[a] > freq[b] ? a : b);
+                }
+
+                return data.map(row => ({
+                    ...row,
+                    [column]: row[column] ?? fillValue
+                }));
+            };
+
+            const applyConstantImputation = (data, column, value) => {
+                return data.map(row => ({
+                    ...row,
+                    [column]: row[column] ?? value
+                }));
+            };
+
+            const applyFillImputation = (data, column, method) => {
+                let lastValue = null;
+                const newData = [...data];
+                
+                if (method === 'ffill') {
+                    for (let i = 0; i < newData.length; i++) {
+                        if (newData[i][column] !== null && newData[i][column] !== undefined) {
+                            lastValue = newData[i][column];
+                        } else if (lastValue !== null) {
+                            newData[i][column] = lastValue;
+                        }
+                    }
+                } else {
+                    for (let i = newData.length - 1; i >= 0; i--) {
+                        if (newData[i][column] !== null && newData[i][column] !== undefined) {
+                            lastValue = newData[i][column];
+                        } else if (lastValue !== null) {
+                            newData[i][column] = lastValue;
+                        }
+                    }
+                }
+                
+                return newData;
+            };
+
+            const applyLabelEncoding = (data, column) => {
+                const uniqueValues = [...new Set(data.map(row => row[column]))];
+                const mapping = {};
+                uniqueValues.forEach((val, idx) => mapping[val] = idx);
+                
+                return data.map(row => ({
+                    ...row,
+                    [column + '_encoded']: mapping[row[column]]
+                }));
+            };
+
+            const applyOneHotEncoding = (data, column) => {
+                const uniqueValues = [...new Set(data.map(row => row[column]))];
+                
+                return data.map(row => {
+                    const newRow = { ...row };
+                    uniqueValues.forEach(val => {
+                        newRow[`${column}_${val}`] = row[column] === val ? 1 : 0;
+                    });
+                    return newRow;
+                });
+            };
+
+            const applyScaling = (data, columns, method) => {
+                const newData = JSON.parse(JSON.stringify(data));
+                
+                columns.forEach(column => {
+                    const values = data.map(row => row[column]).filter(v => typeof v === 'number');
+                    
+                    if (method === 'standard') {
+                        const mean = values.reduce((a, b) => a + b, 0) / values.length;
+                        const std = Math.sqrt(values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / values.length);
+                        newData.forEach(row => {
+                            if (typeof row[column] === 'number') {
+                                row[column + '_scaled'] = (row[column] - mean) / std;
+                            }
+                        });
+                    } else if (method === 'minmax') {
+                        const min = Math.min(...values);
+                        const max = Math.max(...values);
+                        newData.forEach(row => {
+                            if (typeof row[column] === 'number') {
+                                row[column + '_scaled'] = (row[column] - min) / (max - min);
+                            }
+                        });
+                    } else if (method === 'robust') {
+                        const sorted = [...values].sort((a, b) => a - b);
+                        const q1 = sorted[Math.floor(sorted.length * 0.25)];
+                        const q3 = sorted[Math.floor(sorted.length * 0.75)];
+                        const median = sorted[Math.floor(sorted.length * 0.5)];
+                        const iqr = q3 - q1;
+                        newData.forEach(row => {
+                            if (typeof row[column] === 'number') {
+                                row[column + '_scaled'] = (row[column] - median) / iqr;
+                            }
+                        });
+                    }
+                });
+                
+                return newData;
+            };
+
+            const applyTransformation = (data, columns, method) => {
+                const newData = JSON.parse(JSON.stringify(data));
+                
+                columns.forEach(column => {
+                    newData.forEach(row => {
+                        if (typeof row[column] === 'number' && row[column] > 0) {
+                            if (method === 'log') {
+                                row[column + '_log'] = Math.log(row[column]);
+                            } else if (method === 'sqrt') {
+                                row[column + '_sqrt'] = Math.sqrt(row[column]);
+                            } else if (method === 'power') {
+                                row[column + '_squared'] = Math.pow(row[column], 2);
+                            }
+                        }
+                    });
+                });
+                
+                return newData;
+            };
+
+            const removeDuplicates = (data) => {
+                const seen = new Set();
+                return data.filter(row => {
+                    const key = JSON.stringify(row);
+                    if (seen.has(key)) return false;
+                    seen.add(key);
+                    return true;
+                });
+            };
+
+            const renderOverview = () => {
+                const columns = getColumns();
+                const preview = data.slice(0, 10);
+                
+                return (
+                    <div>
+                        <h4 style={{color: 'var(--teal)', marginBottom: '1.5rem', fontSize: '1.5rem'}}>📊 Dataset Overview</h4>
+                        
+                        <div className="feature-pills">
+                            {columns.map(col => (
+                                <span key={col} className="feature-pill">{col}</span>
+                            ))}
+                        </div>
+
+                        <div className="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        {columns.map(col => (
+                                            <th key={col}>{col}</th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {preview.map((row, idx) => (
+                                        <tr key={idx}>
+                                            {columns.map(col => (
+                                                <td key={col}>{row[col] ?? 'null'}</td>
+                                            ))}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                );
+            };
+
+            const renderStatistics = () => {
+                const numericCols = getNumericColumns();
+                const stats = {};
+
+                numericCols.forEach(col => {
+                    const values = data.map(row => row[col]).filter(v => typeof v === 'number');
+                    const mean = values.reduce((a, b) => a + b, 0) / values.length;
+                    const sorted = [...values].sort((a, b) => a - b);
+                    const median = sorted[Math.floor(sorted.length / 2)];
+                    const std = Math.sqrt(values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / values.length);
+
+                    stats[col] = {
+                        mean: mean.toFixed(2),
+                        median: median.toFixed(2),
+                        std: std.toFixed(2),
+                        min: Math.min(...values).toFixed(2),
+                        max: Math.max(...values).toFixed(2)
+                    };
+                });
+
+                return (
+                    <div>
+                        <h4 style={{color: 'var(--teal)', marginBottom: '1.5rem', fontSize: '1.5rem'}}>📈 Statistical Summary</h4>
+                        
+                        <div className="stats-grid">
+                            {Object.entries(stats).map(([col, stat]) => (
+                                <div key={col} className="stat-card">
+                                    <h5>{col}</h5>
+                                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginTop: '1rem'}}>
+                                        <div><small style={{color: 'var(--silver)'}}>Mean:</small> <strong>{stat.mean}</strong></div>
+                                        <div><small style={{color: 'var(--silver)'}}>Median:</small> <strong>{stat.median}</strong></div>
+                                        <div><small style={{color: 'var(--silver)'}}>Std:</small> <strong>{stat.std}</strong></div>
+                                        <div><small style={{color: 'var(--silver)'}}>Range:</small> <strong>{stat.min} - {stat.max}</strong></div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                );
+            };
+
+            const renderMissingAnalysis = () => {
+                const columns = getColumns();
+                const missingData = columns.map(col => {
+                    const missing = data.filter(row => row[col] === null || row[col] === undefined || row[col] === '').length;
+                    return {
+                        column: col,
+                        missing: missing,
+                        percentage: ((missing / data.length) * 100).toFixed(2)
+                    };
+                }).filter(item => item.missing > 0);
+
+                return (
+                    <div>
+                        <h4 style={{color: 'var(--teal)', marginBottom: '1.5rem', fontSize: '1.5rem'}}>🔍 Missing Values Analysis</h4>
+                        
+                        {missingData.length === 0 ? (
+                            <div className="alert alert-success">
+                                <span style={{fontSize: '1.5rem'}}>✅</span>
+                                <div>No missing values detected in the dataset!</div>
+                            </div>
+                        ) : (
+                            <div className="stats-grid">
+                                {missingData.map(item => (
+                                    <div key={item.column} className="stat-card">
+                                        <h5>{item.column}</h5>
+                                        <div className="value">{item.missing}</div>
+                                        <p style={{color: 'var(--silver)', marginTop: '0.5rem'}}>
+                                            {item.percentage}% of total rows
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                );
+            };
+
+            const applyTool = () => {
+                let newData = JSON.parse(JSON.stringify(data));
+                let message = "";
+
+                switch(tool) {
+                    case 'overview':
+                        return renderOverview();
+                    case 'statistics':
+                        return renderStatistics();
+                    case 'missing':
+                        return renderMissingAnalysis();
+                    
+                    case 'mean':
+                    case 'median':
+                    case 'mode':
+                        if (!config.column) {
+                            return <div className="alert alert-warning">⚠️ Please select a column to impute</div>;
+                        }
+                        newData = applySimpleImputation(newData, config.column, tool);
+                        message = `Applied ${tool} imputation to ${config.column}`;
+                        break;
+                    
+                    case 'constant':
+                        if (!config.column) {
+                            return <div className="alert alert-warning">⚠️ Please select a column and value</div>;
+                        }
+                        newData = applyConstantImputation(newData, config.column, config.value || 0);
+                        message = `Applied constant imputation (${config.value}) to ${config.column}`;
+                        break;
+
+                    case 'ffill':
+                    case 'bfill':
+                        if (!config.column) {
+                            return <div className="alert alert-warning">⚠️ Please select a column</div>;
+                        }
+                        newData = applyFillImputation(newData, config.column, tool);
+                        message = `Applied ${tool === 'ffill' ? 'forward' : 'backward'} fill to ${config.column}`;
+                        break;
+
+                    case 'label':
+                        if (!config.column) {
+                            return <div className="alert alert-warning">⚠️ Please select a column</div>;
+                        }
+                        newData = applyLabelEncoding(newData, config.column);
+                        message = `Applied label encoding to ${config.column}`;
+                        break;
+
+                    case 'onehot':
+                        if (!config.column) {
+                            return <div className="alert alert-warning">⚠️ Please select a column</div>;
+                        }
+                        newData = applyOneHotEncoding(newData, config.column);
+                        message = `Applied one-hot encoding to ${config.column}`;
+                        break;
+
+                    case 'standard':
+                    case 'minmax':
+                    case 'robust':
+                        if (!config.columns || config.columns.length === 0) {
+                            return <div className="alert alert-warning">⚠️ Please select columns to scale</div>;
+                        }
+                        newData = applyScaling(newData, config.columns, tool);
+                        message = `Applied ${tool} scaling to selected columns`;
+                        break;
+
+                    case 'log':
+                    case 'sqrt':
+                    case 'power':
+                        if (!config.columns || config.columns.length === 0) {
+                            return <div className="alert alert-warning">⚠️ Please select columns to transform</div>;
+                        }
+                        newData = applyTransformation(newData, config.columns, tool);
+                        message = `Applied ${tool} transformation to selected columns`;
+                        break;
+
+                    case 'duplicates':
+                        newData = removeDuplicates(newData);
+                        message = `Removed ${data.length - newData.length} duplicate rows`;
+                        break;
+
+                    default:
+                        return (
+                            <div className="empty-state">
+                                <div className="empty-state-icon">🔧</div>
+                                <h3>Tool Configuration</h3>
+                                <p>Select parameters for {tool}</p>
+                            </div>
+                        );
+                }
+
+                if (newData !== data) {
+                    setData(newData);
+                    setResult({ type: 'success', message });
+                }
+            };
+
+            const renderToolConfig = () => {
+                const numericCols = getNumericColumns();
+                const categoricalCols = getCategoricalColumns();
+                const allCols = getColumns();
+
+                if (['mean', 'median', 'mode', 'ffill', 'bfill'].includes(tool)) {
+                    return (
+                        <div className="config-panel">
+                            <h4>Configuration</h4>
+                            <div className="form-group">
+                                <label>Select Column</label>
+                                <select value={config.column || ''} onChange={(e) => setConfig({...config, column: e.target.value})}>
+                                    <option value="">-- Select Column --</option>
+                                    {allCols.map(col => (
+                                        <option key={col} value={col}>{col}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <button className="btn" onClick={applyTool}>Apply {tool.toUpperCase()}</button>
+                        </div>
+                    );
+                }
+
+                if (tool === 'constant') {
+                    return (
+                        <div className="config-panel">
+                            <h4>Configuration</h4>
+                            <div className="form-group">
+                                <label>Select Column</label>
+                                <select value={config.column || ''} onChange={(e) => setConfig({...config, column: e.target.value})}>
+                                    <option value="">-- Select Column --</option>
+                                    {allCols.map(col => (
+                                        <option key={col} value={col}>{col}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label>Fill Value</label>
+                                <input 
+                                    type="text" 
+                                    value={config.value || ''} 
+                                    onChange={(e) => setConfig({...config, value: e.target.value})}
+                                    placeholder="Enter fill value"
+                                />
+                            </div>
+                            <button className="btn" onClick={applyTool}>Apply Constant Imputation</button>
+                        </div>
+                    );
+                }
+
+                if (['label', 'onehot', 'ordinal', 'frequency'].includes(tool)) {
+                    return (
+                        <div className="config-panel">
+                            <h4>Configuration</h4>
+                            <div className="form-group">
+                                <label>Select Categorical Column</label>
+                                <select value={config.column || ''} onChange={(e) => setConfig({...config, column: e.target.value})}>
+                                    <option value="">-- Select Column --</option>
+                                    {categoricalCols.map(col => (
+                                        <option key={col} value={col}>{col}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <button className="btn" onClick={applyTool}>Apply {tool.toUpperCase()} Encoding</button>
+                        </div>
+                    );
+                }
+
+                if (['standard', 'minmax', 'robust', 'normalizer'].includes(tool)) {
+                    return (
+                        <div className="config-panel">
+                            <h4>Configuration</h4>
+                            <div className="form-group">
+                                <label>Select Numeric Columns</label>
+                                <div className="checkbox-group">
+                                    {numericCols.map(col => (
+                                        <label key={col} className="checkbox-label">
+                                            <input 
+                                                type="checkbox" 
+                                                checked={config.columns?.includes(col) || false}
+                                                onChange={(e) => {
+                                                    const cols = config.columns || [];
+                                                    if (e.target.checked) {
+                                                        setConfig({...config, columns: [...cols, col]});
+                                                    } else {
+                                                        setConfig({...config, columns: cols.filter(c => c !== col)});
+                                                    }
+                                                }}
+                                            />
+                                            {col}
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                            <button className="btn" onClick={applyTool}>Apply {tool.toUpperCase()} Scaling</button>
+                        </div>
+                    );
+                }
+
+                if (['log', 'sqrt', 'power'].includes(tool)) {
+                    return (
+                        <div className="config-panel">
+                            <h4>Configuration</h4>
+                            <div className="form-group">
+                                <label>Select Numeric Columns</label>
+                                <div className="checkbox-group">
+                                    {numericCols.map(col => (
+                                        <label key={col} className="checkbox-label">
+                                            <input 
+                                                type="checkbox" 
+                                                checked={config.columns?.includes(col) || false}
+                                                onChange={(e) => {
+                                                    const cols = config.columns || [];
+                                                    if (e.target.checked) {
+                                                        setConfig({...config, columns: [...cols, col]});
+                                                    } else {
+                                                        setConfig({...config, columns: cols.filter(c => c !== col)});
+                                                    }
+                                                }}
+                                            />
+                                            {col}
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                            <button className="btn" onClick={applyTool}>Apply {tool.toUpperCase()} Transformation</button>
+                        </div>
+                    );
+                }
+
+                if (tool === 'duplicates') {
+                    return (
+                        <div className="config-panel">
+                            <h4>Remove Duplicates</h4>
+                            <p style={{color: 'var(--silver)', marginBottom: '1.5rem'}}>
+                                This will remove all duplicate rows from your dataset based on exact matches across all columns.
+                            </p>
+                            <button className="btn" onClick={applyTool}>Remove Duplicates</button>
+                        </div>
+                    );
+                }
+
+                return null;
+            };
+
+            return (
+                <div>
+                    {renderToolConfig()}
+                    {result && (
+                        <div className={`alert alert-${result.type}`}>
+                            <span style={{fontSize: '1.5rem'}}>
+                                {result.type === 'success' ? '✅' : '⚠️'}
+                            </span>
+                            <div>{result.message}</div>
+                        </div>
+                    )}
+                    {applyTool()}
+                </div>
+            );
+        }
+
+        // Render App
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,2182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C.R.E.A.T.O.R - Cognitive Runtime for Data Processing</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0ea5e9;
+            --primary-dark: #0284c7;
+            --secondary: #8b5cf6;
+            --accent: #10b981;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --border: #334155;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .background-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .app-container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            padding: 3rem 0;
+            position: relative;
+        }
+
+        .header h1 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            animation: fadeIn 0.8s ease-out 0.2s both;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .upload-section {
+            background: var(--bg-card);
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-section:hover {
+            border-color: var(--primary);
+            background: rgba(14, 165, 233, 0.05);
+        }
+
+        .upload-section.drag-over {
+            border-color: var(--primary);
+            background: rgba(14, 165, 233, 0.1);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-hover);
+            margin-left: 0.5rem;
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+            box-shadow: 0 8px 20px rgba(51, 65, 85, 0.3);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 2rem;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .sidebar {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            height: fit-content;
+            position: sticky;
+            top: 2rem;
+            max-height: calc(100vh - 4rem);
+            overflow-y: auto;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+            border-radius: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--bg-hover);
+        }
+
+        .sidebar h3 {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .tool-category {
+            margin-bottom: 1rem;
+        }
+
+        .category-header {
+            background: var(--bg-hover);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .category-header:hover {
+            background: var(--border);
+            transform: translateX(4px);
+        }
+
+        .category-header.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .expand-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .expand-icon.expanded {
+            transform: rotate(90deg);
+        }
+
+        .tool-list {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .tool-list.expanded {
+            max-height: 600px;
+        }
+
+        .tool-item {
+            padding: 0.6rem 1rem;
+            margin: 0.3rem 0;
+            margin-left: 1rem;
+            border-left: 2px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text-secondary);
+        }
+
+        .tool-item:hover {
+            color: var(--text-primary);
+            border-left-color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .tool-item.active {
+            color: var(--primary);
+            border-left-color: var(--primary);
+            background: rgba(14, 165, 233, 0.1);
+            border-radius: 0 6px 6px 0;
+        }
+
+        .workspace {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 2rem;
+            min-height: 600px;
+        }
+
+        .dataset-info {
+            background: var(--bg-dark);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .info-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--primary);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: var(--bg-dark);
+            color: var(--primary);
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        td {
+            padding: 0.75rem;
+            border-top: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        tr:hover {
+            background: var(--bg-hover);
+        }
+
+        .config-panel {
+            background: var(--bg-dark);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .config-panel h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .form-group select,
+        .form-group input[type="number"],
+        .form-group input[type="text"] {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .stat-card {
+            background: var(--bg-dark);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .stat-card h5 {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--primary);
+        }
+
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid var(--warning);
+            color: var(--warning);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+        }
+
+        .chart-container {
+            background: var(--bg-dark);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: var(--bg-dark);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .ai-agent-button {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--secondary), #6366f1);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ai-agent-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 32px rgba(139, 92, 246, 0.6);
+        }
+
+        .ai-agent-button.active {
+            background: var(--error);
+        }
+
+        .ai-chat-panel {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 450px;
+            height: 600px;
+            background: var(--bg-card);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            z-index: 999;
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+            pointer-events: none;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border);
+        }
+
+        .ai-chat-panel.open {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: all;
+        }
+
+        .ai-chat-header {
+            background: linear-gradient(135deg, var(--secondary), #6366f1);
+            padding: 1.5rem;
+            border-radius: 16px 16px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ai-chat-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .close-chat {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .close-chat:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .ai-chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .ai-chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .ai-chat-messages::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+
+        .ai-chat-messages::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .message {
+            display: flex;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        }
+
+        .message.ai .message-avatar {
+            background: linear-gradient(135deg, var(--secondary), #6366f1);
+        }
+
+        .message-content {
+            flex: 1;
+            background: var(--bg-dark);
+            padding: 1rem;
+            border-radius: 12px;
+            line-height: 1.6;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(2, 132, 199, 0.1));
+            border: 1px solid rgba(14, 165, 233, 0.2);
+        }
+
+        .message-content code {
+            background: var(--bg-card);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        .message-content pre {
+            background: var(--bg-card);
+            padding: 0.75rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 0.5rem 0;
+        }
+
+        .suggestion-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .suggestion-chip {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 0.4rem 0.8rem;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .suggestion-chip:hover {
+            background: var(--bg-hover);
+            border-color: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        .ai-chat-input {
+            padding: 1rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .ai-chat-input textarea {
+            flex: 1;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: 'DM Sans', sans-serif;
+            resize: none;
+            height: 60px;
+            transition: all 0.3s ease;
+        }
+
+        .ai-chat-input textarea:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .send-button {
+            background: linear-gradient(135deg, var(--secondary), #6366f1);
+            border: none;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+        }
+
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 0.25rem;
+            padding: 0.5rem;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--secondary);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.7;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        .action-button {
+            background: var(--bg-hover);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            transition: all 0.2s ease;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 500;
+        }
+
+        .action-button:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+                max-height: none;
+            }
+
+            .ai-chat-panel {
+                width: calc(100% - 2rem);
+                right: 1rem;
+                left: 1rem;
+                height: 500px;
+            }
+
+            .ai-agent-button {
+                right: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-grid"></div>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const toolsConfig = {
+            eda: {
+                name: "Exploratory Data Analysis",
+                icon: "📊",
+                tools: [
+                    { id: "overview", name: "Dataset Overview" },
+                    { id: "statistics", name: "Statistical Summary" },
+                    { id: "missing", name: "Missing Values Analysis" },
+                    { id: "correlation", name: "Correlation Matrix" },
+                    { id: "distribution", name: "Distribution Analysis" },
+                    { id: "outliers", name: "Outlier Detection" }
+                ]
+            },
+            imputation: {
+                name: "Missing Value Imputation",
+                icon: "🔧",
+                tools: [
+                    { id: "mean", name: "Mean Imputation" },
+                    { id: "median", name: "Median Imputation" },
+                    { id: "mode", name: "Mode Imputation" },
+                    { id: "constant", name: "Constant Value" },
+                    { id: "ffill", name: "Forward Fill" },
+                    { id: "bfill", name: "Backward Fill" },
+                    { id: "knn", name: "KNN Imputation" },
+                    { id: "iterative", name: "Iterative Imputation" }
+                ]
+            },
+            encoding: {
+                name: "Categorical Encoding",
+                icon: "🏷️",
+                tools: [
+                    { id: "label", name: "Label Encoding" },
+                    { id: "onehot", name: "One-Hot Encoding" },
+                    { id: "ordinal", name: "Ordinal Encoding" },
+                    { id: "target", name: "Target Encoding" },
+                    { id: "binary", name: "Binary Encoding" },
+                    { id: "frequency", name: "Frequency Encoding" }
+                ]
+            },
+            scaling: {
+                name: "Feature Scaling",
+                icon: "⚖️",
+                tools: [
+                    { id: "standard", name: "Standard Scaler" },
+                    { id: "minmax", name: "MinMax Scaler" },
+                    { id: "robust", name: "Robust Scaler" },
+                    { id: "maxabs", name: "MaxAbs Scaler" },
+                    { id: "normalizer", name: "Normalizer" }
+                ]
+            },
+            transformation: {
+                name: "Feature Transformation",
+                icon: "🔄",
+                tools: [
+                    { id: "log", name: "Log Transformation" },
+                    { id: "sqrt", name: "Square Root" },
+                    { id: "power", name: "Power Transformation" },
+                    { id: "boxcox", name: "Box-Cox" },
+                    { id: "yeojohnson", name: "Yeo-Johnson" }
+                ]
+            },
+            creation: {
+                name: "Feature Creation",
+                icon: "✨",
+                tools: [
+                    { id: "polynomial", name: "Polynomial Features" },
+                    { id: "interaction", name: "Interaction Features" },
+                    { id: "binning", name: "Binning/Discretization" },
+                    { id: "datetime", name: "DateTime Features" },
+                    { id: "aggregation", name: "Aggregation Features" }
+                ]
+            },
+            selection: {
+                name: "Feature Selection",
+                icon: "🎯",
+                tools: [
+                    { id: "variance", name: "Variance Threshold" },
+                    { id: "correlation-select", name: "Correlation Filter" },
+                    { id: "univariate", name: "Univariate Selection" },
+                    { id: "rfe", name: "Recursive Feature Elimination" }
+                ]
+            },
+            cleaning: {
+                name: "Data Cleaning",
+                icon: "🧹",
+                tools: [
+                    { id: "duplicates", name: "Remove Duplicates" },
+                    { id: "outliers-clean", name: "Handle Outliers" },
+                    { id: "convert-types", name: "Type Conversion" },
+                    { id: "rename", name: "Rename Columns" },
+                    { id: "filter-rows", name: "Filter Rows" }
+                ]
+            }
+        };
+
+        function DataPreprocessingToolkit() {
+            const [data, setData] = useState(null);
+            const [originalData, setOriginalData] = useState(null);
+            const [selectedCategory, setSelectedCategory] = useState(null);
+            const [selectedTool, setSelectedTool] = useState(null);
+            const [expandedCategories, setExpandedCategories] = useState({});
+            const [processing, setProcessing] = useState(false);
+            const [aiChatOpen, setAiChatOpen] = useState(false);
+            const fileInputRef = useRef(null);
+
+            const handleFileUpload = (file) => {
+                if (file) {
+                    Papa.parse(file, {
+                        header: true,
+                        dynamicTyping: true,
+                        complete: (results) => {
+                            setData(results.data);
+                            setOriginalData(JSON.parse(JSON.stringify(results.data)));
+                            setSelectedTool(null);
+                        },
+                        error: (error) => {
+                            alert("Error parsing file: " + error.message);
+                        }
+                    });
+                }
+            };
+
+            const handleDrop = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const file = e.dataTransfer.files[0];
+                if (file) handleFileUpload(file);
+            };
+
+            const handleDragOver = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            };
+
+            const toggleCategory = (categoryKey) => {
+                setExpandedCategories(prev => ({
+                    ...prev,
+                    [categoryKey]: !prev[categoryKey]
+                }));
+            };
+
+            const selectTool = (categoryKey, toolId) => {
+                setSelectedCategory(categoryKey);
+                setSelectedTool(toolId);
+            };
+
+            const downloadData = () => {
+                if (!data) return;
+                const csv = Papa.unparse(data);
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'processed_data.csv';
+                a.click();
+                URL.revokeObjectURL(url);
+            };
+
+            const loadSampleData = () => {
+                const sampleData = [
+                    { age: 25, salary: 50000, department: 'Sales', experience: 2, rating: 4.2 },
+                    { age: 30, salary: 65000, department: 'IT', experience: 5, rating: 4.5 },
+                    { age: null, salary: 55000, department: 'HR', experience: 3, rating: null },
+                    { age: 28, salary: null, department: 'Sales', experience: 4, rating: 3.8 },
+                    { age: 35, salary: 80000, department: 'IT', experience: 8, rating: 4.7 },
+                    { age: 22, salary: 45000, department: 'Marketing', experience: 1, rating: 3.9 },
+                    { age: 40, salary: 95000, department: 'IT', experience: 12, rating: 4.8 },
+                    { age: 27, salary: 58000, department: 'HR', experience: null, rating: 4.1 },
+                    { age: 32, salary: 72000, department: 'Sales', experience: 6, rating: 4.4 },
+                    { age: 29, salary: 62000, department: 'Marketing', experience: 4, rating: null }
+                ];
+                setData(sampleData);
+                setOriginalData(JSON.parse(JSON.stringify(sampleData)));
+            };
+
+            return (
+                <div className="app-container">
+                    <header className="header">
+                        <h1>C.R.E.A.T.O.R</h1>
+                        <p>Cognitive Runtime for Engineering Agent-based Technology Operations & Results</p>
+                    </header>
+
+                    {!data ? (
+                        <div 
+                            className="upload-section"
+                            onDrop={handleDrop}
+                            onDragOver={handleDragOver}
+                            onClick={() => fileInputRef.current?.click()}
+                        >
+                            <div className="upload-icon">📁</div>
+                            <h3>Upload Your Dataset</h3>
+                            <p style={{color: 'var(--text-secondary)', marginTop: '0.5rem'}}>
+                                Drag & drop a CSV file or click to browse
+                            </p>
+                            <p style={{color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '1rem'}}>
+                                Supports CSV files of any size
+                            </p>
+                            <input 
+                                ref={fileInputRef}
+                                type="file" 
+                                className="file-input" 
+                                accept=".csv"
+                                onChange={(e) => handleFileUpload(e.target.files[0])}
+                            />
+                            <div style={{marginTop: '1.5rem'}}>
+                                <button className="btn btn-secondary" onClick={(e) => {
+                                    e.stopPropagation();
+                                    loadSampleData();
+                                }}>
+                                    Load Sample Dataset
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="main-content">
+                            <aside className="sidebar">
+                                <h3>Preprocessing Tools</h3>
+                                {Object.entries(toolsConfig).map(([key, category]) => (
+                                    <div key={key} className="tool-category">
+                                        <div 
+                                            className={`category-header ${selectedCategory === key ? 'active' : ''}`}
+                                            onClick={() => toggleCategory(key)}
+                                        >
+                                            <span>{category.icon} {category.name}</span>
+                                            <span className={`expand-icon ${expandedCategories[key] ? 'expanded' : ''}`}>
+                                                ▶
+                                            </span>
+                                        </div>
+                                        <div className={`tool-list ${expandedCategories[key] ? 'expanded' : ''}`}>
+                                            {category.tools.map(tool => (
+                                                <div 
+                                                    key={tool.id}
+                                                    className={`tool-item ${selectedTool === tool.id ? 'active' : ''}`}
+                                                    onClick={() => selectTool(key, tool.id)}
+                                                >
+                                                    {tool.name}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </aside>
+
+                            <main className="workspace">
+                                <DatasetInfo data={data} />
+                                {selectedTool ? (
+                                    <ToolWorkspace 
+                                        tool={selectedTool} 
+                                        category={selectedCategory}
+                                        data={data} 
+                                        setData={setData}
+                                        originalData={originalData}
+                                    />
+                                ) : (
+                                    <div className="empty-state">
+                                        <div className="empty-state-icon">🎯</div>
+                                        <h3>Select a Tool to Get Started</h3>
+                                        <p>Choose a preprocessing technique from the sidebar</p>
+                                    </div>
+                                )}
+                                <div className="action-buttons">
+                                    <button className="btn" onClick={downloadData}>
+                                        💾 Download Processed Data
+                                    </button>
+                                    <button className="btn btn-secondary" onClick={() => {
+                                        setData(null);
+                                        setSelectedTool(null);
+                                    }}>
+                                        🔄 Load New Dataset
+                                    </button>
+                                    <button className="btn btn-secondary" onClick={() => {
+                                        setData(JSON.parse(JSON.stringify(originalData)));
+                                    }}>
+                                        ↩️ Reset to Original
+                                    </button>
+                                </div>
+                            </main>
+                        </div>
+                    )}
+
+                    {data && (
+                        <>
+                            <button 
+                                className={`ai-agent-button ${aiChatOpen ? 'active' : ''}`}
+                                onClick={() => setAiChatOpen(!aiChatOpen)}
+                                title="AI Preprocessing Assistant"
+                            >
+                                🤖
+                            </button>
+                            <AIAgent 
+                                isOpen={aiChatOpen} 
+                                onClose={() => setAiChatOpen(false)}
+                                data={data}
+                                onApplyTool={(category, tool) => {
+                                    selectTool(category, tool);
+                                    setAiChatOpen(false);
+                                }}
+                            />
+                        </>
+                    )}
+                </div>
+            );
+        }
+
+        function DatasetInfo({ data }) {
+            if (!data || data.length === 0) return null;
+
+            const columns = Object.keys(data[0] || {});
+            const rows = data.length;
+            
+            const missingCount = data.reduce((acc, row) => {
+                Object.values(row).forEach(val => {
+                    if (val === null || val === undefined || val === '') acc++;
+                });
+                return acc;
+            }, 0);
+
+            const numericCols = columns.filter(col => {
+                return data.some(row => typeof row[col] === 'number');
+            });
+
+            return (
+                <div className="dataset-info">
+                    <div className="info-item">
+                        <div className="info-label">Rows</div>
+                        <div className="info-value">{rows.toLocaleString()}</div>
+                    </div>
+                    <div className="info-item">
+                        <div className="info-label">Columns</div>
+                        <div className="info-value">{columns.length}</div>
+                    </div>
+                    <div className="info-item">
+                        <div className="info-label">Missing Values</div>
+                        <div className="info-value">{missingCount}</div>
+                    </div>
+                    <div className="info-item">
+                        <div className="info-label">Numeric Columns</div>
+                        <div className="info-value">{numericCols.length}</div>
+                    </div>
+                </div>
+            );
+        }
+
+        function ToolWorkspace({ tool, category, data, setData, originalData }) {
+            const [config, setConfig] = useState({});
+            const [result, setResult] = useState(null);
+
+            const getColumns = () => Object.keys(data[0] || {});
+            
+            const getNumericColumns = () => {
+                return getColumns().filter(col => 
+                    data.some(row => typeof row[col] === 'number')
+                );
+            };
+
+            const getCategoricalColumns = () => {
+                return getColumns().filter(col => 
+                    data.some(row => typeof row[col] === 'string')
+                );
+            };
+
+            const applyTool = () => {
+                let newData = JSON.parse(JSON.stringify(data));
+                let message = "";
+
+                switch(tool) {
+                    case 'overview':
+                        return renderOverview();
+                    case 'statistics':
+                        return renderStatistics();
+                    case 'missing':
+                        return renderMissingAnalysis();
+                    case 'correlation':
+                        return renderCorrelation();
+                    case 'distribution':
+                        return renderDistribution();
+                    case 'outliers':
+                        return renderOutliers();
+                    
+                    // Imputation
+                    case 'mean':
+                    case 'median':
+                    case 'mode':
+                        newData = applySimpleImputation(newData, config.column, tool);
+                        message = `Applied ${tool} imputation to ${config.column}`;
+                        break;
+                    
+                    case 'constant':
+                        newData = applyConstantImputation(newData, config.column, config.value || 0);
+                        message = `Applied constant imputation (${config.value}) to ${config.column}`;
+                        break;
+
+                    case 'ffill':
+                    case 'bfill':
+                        newData = applyFillImputation(newData, config.column, tool);
+                        message = `Applied ${tool === 'ffill' ? 'forward' : 'backward'} fill to ${config.column}`;
+                        break;
+
+                    // Encoding
+                    case 'label':
+                        newData = applyLabelEncoding(newData, config.column);
+                        message = `Applied label encoding to ${config.column}`;
+                        break;
+
+                    case 'onehot':
+                        newData = applyOneHotEncoding(newData, config.column);
+                        message = `Applied one-hot encoding to ${config.column}`;
+                        break;
+
+                    // Scaling
+                    case 'standard':
+                    case 'minmax':
+                    case 'robust':
+                        newData = applyScaling(newData, config.columns || [], tool);
+                        message = `Applied ${tool} scaling to selected columns`;
+                        break;
+
+                    // Transformation
+                    case 'log':
+                    case 'sqrt':
+                        newData = applyTransformation(newData, config.columns || [], tool);
+                        message = `Applied ${tool} transformation to selected columns`;
+                        break;
+
+                    // Cleaning
+                    case 'duplicates':
+                        newData = removeDuplicates(newData);
+                        message = `Removed ${data.length - newData.length} duplicate rows`;
+                        break;
+
+                    default:
+                        message = `${tool} configuration interface`;
+                }
+
+                if (newData !== data) {
+                    setData(newData);
+                    setResult({ type: 'success', message });
+                }
+            };
+
+            // Implementation functions
+            const applySimpleImputation = (data, column, method) => {
+                const values = data.map(row => row[column]).filter(v => v !== null && v !== undefined && v !== '');
+                let fillValue;
+
+                if (method === 'mean') {
+                    fillValue = values.reduce((a, b) => a + b, 0) / values.length;
+                } else if (method === 'median') {
+                    const sorted = [...values].sort((a, b) => a - b);
+                    fillValue = sorted[Math.floor(sorted.length / 2)];
+                } else if (method === 'mode') {
+                    const freq = {};
+                    values.forEach(v => freq[v] = (freq[v] || 0) + 1);
+                    fillValue = Object.keys(freq).reduce((a, b) => freq[a] > freq[b] ? a : b);
+                }
+
+                return data.map(row => ({
+                    ...row,
+                    [column]: row[column] ?? fillValue
+                }));
+            };
+
+            const applyConstantImputation = (data, column, value) => {
+                return data.map(row => ({
+                    ...row,
+                    [column]: row[column] ?? value
+                }));
+            };
+
+            const applyFillImputation = (data, column, method) => {
+                let lastValue = null;
+                const newData = [...data];
+                
+                if (method === 'ffill') {
+                    for (let i = 0; i < newData.length; i++) {
+                        if (newData[i][column] !== null && newData[i][column] !== undefined) {
+                            lastValue = newData[i][column];
+                        } else if (lastValue !== null) {
+                            newData[i][column] = lastValue;
+                        }
+                    }
+                } else {
+                    for (let i = newData.length - 1; i >= 0; i--) {
+                        if (newData[i][column] !== null && newData[i][column] !== undefined) {
+                            lastValue = newData[i][column];
+                        } else if (lastValue !== null) {
+                            newData[i][column] = lastValue;
+                        }
+                    }
+                }
+                
+                return newData;
+            };
+
+            const applyLabelEncoding = (data, column) => {
+                const uniqueValues = [...new Set(data.map(row => row[column]))];
+                const mapping = {};
+                uniqueValues.forEach((val, idx) => mapping[val] = idx);
+                
+                return data.map(row => ({
+                    ...row,
+                    [column + '_encoded']: mapping[row[column]]
+                }));
+            };
+
+            const applyOneHotEncoding = (data, column) => {
+                const uniqueValues = [...new Set(data.map(row => row[column]))];
+                
+                return data.map(row => {
+                    const newRow = { ...row };
+                    uniqueValues.forEach(val => {
+                        newRow[`${column}_${val}`] = row[column] === val ? 1 : 0;
+                    });
+                    return newRow;
+                });
+            };
+
+            const applyScaling = (data, columns, method) => {
+                const newData = JSON.parse(JSON.stringify(data));
+                
+                columns.forEach(column => {
+                    const values = data.map(row => row[column]).filter(v => typeof v === 'number');
+                    
+                    if (method === 'standard') {
+                        const mean = values.reduce((a, b) => a + b, 0) / values.length;
+                        const std = Math.sqrt(values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / values.length);
+                        newData.forEach(row => {
+                            if (typeof row[column] === 'number') {
+                                row[column + '_scaled'] = (row[column] - mean) / std;
+                            }
+                        });
+                    } else if (method === 'minmax') {
+                        const min = Math.min(...values);
+                        const max = Math.max(...values);
+                        newData.forEach(row => {
+                            if (typeof row[column] === 'number') {
+                                row[column + '_scaled'] = (row[column] - min) / (max - min);
+                            }
+                        });
+                    } else if (method === 'robust') {
+                        const sorted = [...values].sort((a, b) => a - b);
+                        const q1 = sorted[Math.floor(sorted.length * 0.25)];
+                        const q3 = sorted[Math.floor(sorted.length * 0.75)];
+                        const median = sorted[Math.floor(sorted.length * 0.5)];
+                        const iqr = q3 - q1;
+                        newData.forEach(row => {
+                            if (typeof row[column] === 'number') {
+                                row[column + '_scaled'] = (row[column] - median) / iqr;
+                            }
+                        });
+                    }
+                });
+                
+                return newData;
+            };
+
+            const applyTransformation = (data, columns, method) => {
+                const newData = JSON.parse(JSON.stringify(data));
+                
+                columns.forEach(column => {
+                    newData.forEach(row => {
+                        if (typeof row[column] === 'number' && row[column] > 0) {
+                            if (method === 'log') {
+                                row[column + '_log'] = Math.log(row[column]);
+                            } else if (method === 'sqrt') {
+                                row[column + '_sqrt'] = Math.sqrt(row[column]);
+                            }
+                        }
+                    });
+                });
+                
+                return newData;
+            };
+
+            const removeDuplicates = (data) => {
+                const seen = new Set();
+                return data.filter(row => {
+                    const key = JSON.stringify(row);
+                    if (seen.has(key)) return false;
+                    seen.add(key);
+                    return true;
+                });
+            };
+
+            // Render functions for EDA tools
+            const renderOverview = () => {
+                const columns = getColumns();
+                const columnTypes = {};
+                
+                columns.forEach(col => {
+                    const types = new Set(data.map(row => typeof row[col]));
+                    columnTypes[col] = types.has('number') ? 'Numeric' : 'Categorical';
+                });
+
+                return (
+                    <div>
+                        <h4 style={{marginBottom: '1rem', color: 'var(--primary)'}}>📋 Dataset Overview</h4>
+                        <div className="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Column Name</th>
+                                        <th>Type</th>
+                                        <th>Non-Null Count</th>
+                                        <th>Null Count</th>
+                                        <th>Unique Values</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {columns.map(col => {
+                                        const nonNull = data.filter(row => row[col] !== null && row[col] !== undefined && row[col] !== '').length;
+                                        const unique = new Set(data.map(row => row[col])).size;
+                                        return (
+                                            <tr key={col}>
+                                                <td style={{fontWeight: '600', color: 'var(--text-primary)'}}>{col}</td>
+                                                <td><span className="badge">{columnTypes[col]}</span></td>
+                                                <td>{nonNull}</td>
+                                                <td>{data.length - nonNull}</td>
+                                                <td>{unique}</td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                        <DataPreview data={data} />
+                    </div>
+                );
+            };
+
+            const renderStatistics = () => {
+                const numericCols = getNumericColumns();
+                const stats = {};
+
+                numericCols.forEach(col => {
+                    const values = data.map(row => row[col]).filter(v => typeof v === 'number');
+                    const mean = values.reduce((a, b) => a + b, 0) / values.length;
+                    const sorted = [...values].sort((a, b) => a - b);
+                    
+                    stats[col] = {
+                        mean: mean.toFixed(2),
+                        median: sorted[Math.floor(sorted.length / 2)].toFixed(2),
+                        min: Math.min(...values).toFixed(2),
+                        max: Math.max(...values).toFixed(2),
+                        std: Math.sqrt(values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / values.length).toFixed(2)
+                    };
+                });
+
+                return (
+                    <div>
+                        <h4 style={{marginBottom: '1rem', color: 'var(--primary)'}}>📈 Statistical Summary</h4>
+                        <div className="stats-grid">
+                            {Object.entries(stats).map(([col, stat]) => (
+                                <div key={col} className="stat-card">
+                                    <h5>{col}</h5>
+                                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginTop: '1rem'}}>
+                                        <div>
+                                            <div style={{fontSize: '0.8rem', color: 'var(--text-secondary)'}}>Mean</div>
+                                            <div style={{fontWeight: '600', fontFamily: 'JetBrains Mono'}}>{stat.mean}</div>
+                                        </div>
+                                        <div>
+                                            <div style={{fontSize: '0.8rem', color: 'var(--text-secondary)'}}>Median</div>
+                                            <div style={{fontWeight: '600', fontFamily: 'JetBrains Mono'}}>{stat.median}</div>
+                                        </div>
+                                        <div>
+                                            <div style={{fontSize: '0.8rem', color: 'var(--text-secondary)'}}>Std Dev</div>
+                                            <div style={{fontWeight: '600', fontFamily: 'JetBrains Mono'}}>{stat.std}</div>
+                                        </div>
+                                        <div>
+                                            <div style={{fontSize: '0.8rem', color: 'var(--text-secondary)'}}>Range</div>
+                                            <div style={{fontWeight: '600', fontFamily: 'JetBrains Mono'}}>{stat.min} - {stat.max}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                );
+            };
+
+            const renderMissingAnalysis = () => {
+                const columns = getColumns();
+                const missingData = columns.map(col => {
+                    const missing = data.filter(row => row[col] === null || row[col] === undefined || row[col] === '').length;
+                    return {
+                        column: col,
+                        missing,
+                        percentage: ((missing / data.length) * 100).toFixed(2)
+                    };
+                }).filter(item => item.missing > 0);
+
+                return (
+                    <div>
+                        <h4 style={{marginBottom: '1rem', color: 'var(--primary)'}}>🔍 Missing Values Analysis</h4>
+                        {missingData.length > 0 ? (
+                            <div className="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Column</th>
+                                            <th>Missing Count</th>
+                                            <th>Percentage</th>
+                                            <th>Visualization</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {missingData.map(item => (
+                                            <tr key={item.column}>
+                                                <td style={{fontWeight: '600', color: 'var(--text-primary)'}}>{item.column}</td>
+                                                <td>{item.missing}</td>
+                                                <td>{item.percentage}%</td>
+                                                <td>
+                                                    <div style={{
+                                                        background: 'var(--bg-dark)',
+                                                        height: '20px',
+                                                        borderRadius: '4px',
+                                                        overflow: 'hidden'
+                                                    }}>
+                                                        <div style={{
+                                                            background: 'linear-gradient(90deg, var(--warning), var(--error))',
+                                                            height: '100%',
+                                                            width: item.percentage + '%',
+                                                            transition: 'width 0.5s ease'
+                                                        }}></div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <div className="alert alert-success">
+                                ✓ No missing values detected in the dataset!
+                            </div>
+                        )}
+                    </div>
+                );
+            };
+
+            const renderCorrelation = () => {
+                const numericCols = getNumericColumns();
+                
+                if (numericCols.length < 2) {
+                    return (
+                        <div className="alert alert-warning">
+                            ⚠️ Need at least 2 numeric columns for correlation analysis
+                        </div>
+                    );
+                }
+
+                const correlations = {};
+                numericCols.forEach((col1, i) => {
+                    correlations[col1] = {};
+                    numericCols.forEach((col2, j) => {
+                        const values1 = data.map(row => row[col1]).filter(v => typeof v === 'number');
+                        const values2 = data.map(row => row[col2]).filter(v => typeof v === 'number');
+                        correlations[col1][col2] = calculateCorrelation(values1, values2);
+                    });
+                });
+
+                return (
+                    <div>
+                        <h4 style={{marginBottom: '1rem', color: 'var(--primary)'}}>🔗 Correlation Matrix</h4>
+                        <div className="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        {numericCols.map(col => <th key={col}>{col}</th>)}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {numericCols.map(col1 => (
+                                        <tr key={col1}>
+                                            <th>{col1}</th>
+                                            {numericCols.map(col2 => {
+                                                const corr = correlations[col1][col2];
+                                                const absCorr = Math.abs(corr);
+                                                const color = corr > 0 ? `rgba(16, 185, 129, ${absCorr})` : `rgba(239, 68, 68, ${absCorr})`;
+                                                return (
+                                                    <td key={col2} style={{
+                                                        background: color,
+                                                        fontWeight: '600',
+                                                        fontFamily: 'JetBrains Mono'
+                                                    }}>
+                                                        {corr.toFixed(2)}
+                                                    </td>
+                                                );
+                                            })}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                );
+            };
+
+            const calculateCorrelation = (x, y) => {
+                const n = Math.min(x.length, y.length);
+                const meanX = x.reduce((a, b) => a + b, 0) / n;
+                const meanY = y.reduce((a, b) => a + b, 0) / n;
+                
+                let num = 0, denX = 0, denY = 0;
+                for (let i = 0; i < n; i++) {
+                    const dx = x[i] - meanX;
+                    const dy = y[i] - meanY;
+                    num += dx * dy;
+                    denX += dx * dx;
+                    denY += dy * dy;
+                }
+                
+                return num / Math.sqrt(denX * denY) || 0;
+            };
+
+            const renderDistribution = () => {
+                return (
+                    <div>
+                        <h4 style={{marginBottom: '1rem', color: 'var(--primary)'}}>📊 Distribution Analysis</h4>
+                        <div className="form-group">
+                            <label>Select Column</label>
+                            <select value={config.column || ''} onChange={e => setConfig({...config, column: e.target.value})}>
+                                <option value="">Choose a column...</option>
+                                {getNumericColumns().map(col => (
+                                    <option key={col} value={col}>{col}</option>
+                                ))}
+                            </select>
+                        </div>
+                        {config.column && renderHistogram(config.column)}
+                    </div>
+                );
+            };
+
+            const renderHistogram = (column) => {
+                const values = data.map(row => row[column]).filter(v => typeof v === 'number');
+                const min = Math.min(...values);
+                const max = Math.max(...values);
+                const bins = 10;
+                const binSize = (max - min) / bins;
+                const histogram = Array(bins).fill(0);
+                
+                values.forEach(val => {
+                    const binIndex = Math.min(Math.floor((val - min) / binSize), bins - 1);
+                    histogram[binIndex]++;
+                });
+
+                const maxCount = Math.max(...histogram);
+
+                return (
+                    <div className="chart-container">
+                        <div style={{display: 'flex', alignItems: 'flex-end', gap: '4px', height: '200px'}}>
+                            {histogram.map((count, i) => (
+                                <div key={i} style={{
+                                    flex: 1,
+                                    background: 'linear-gradient(180deg, var(--primary), var(--primary-dark))',
+                                    height: `${(count / maxCount) * 100}%`,
+                                    borderRadius: '4px 4px 0 0',
+                                    transition: 'height 0.5s ease',
+                                    position: 'relative'
+                                }}>
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: '-20px',
+                                        left: '50%',
+                                        transform: 'translateX(-50%)',
+                                        fontSize: '0.8rem',
+                                        color: 'var(--text-secondary)',
+                                        fontFamily: 'JetBrains Mono'
+                                    }}>{count}</div>
+                                </div>
+                            ))}
+                        </div>
+                        <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)'}}>
+                            <span>{min.toFixed(2)}</span>
+                            <span>{max.toFixed(2)}</span>
+                        </div>
+                    </div>
+                );
+            };
+
+            const renderOutliers = () => {
+                const numericCols = getNumericColumns();
+                const outlierInfo = numericCols.map(col => {
+                    const values = data.map(row => row[col]).filter(v => typeof v === 'number');
+                    const sorted = [...values].sort((a, b) => a - b);
+                    const q1 = sorted[Math.floor(sorted.length * 0.25)];
+                    const q3 = sorted[Math.floor(sorted.length * 0.75)];
+                    const iqr = q3 - q1;
+                    const lowerBound = q1 - 1.5 * iqr;
+                    const upperBound = q3 + 1.5 * iqr;
+                    const outliers = values.filter(v => v < lowerBound || v > upperBound);
+                    
+                    return {
+                        column: col,
+                        count: outliers.length,
+                        percentage: ((outliers.length / values.length) * 100).toFixed(2),
+                        lowerBound: lowerBound.toFixed(2),
+                        upperBound: upperBound.toFixed(2)
+                    };
+                }).filter(item => item.count > 0);
+
+                return (
+                    <div>
+                        <h4 style={{marginBottom: '1rem', color: 'var(--primary)'}}>🎯 Outlier Detection (IQR Method)</h4>
+                        {outlierInfo.length > 0 ? (
+                            <div className="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Column</th>
+                                            <th>Outliers</th>
+                                            <th>Percentage</th>
+                                            <th>Lower Bound</th>
+                                            <th>Upper Bound</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {outlierInfo.map(item => (
+                                            <tr key={item.column}>
+                                                <td style={{fontWeight: '600', color: 'var(--text-primary)'}}>{item.column}</td>
+                                                <td>{item.count}</td>
+                                                <td>{item.percentage}%</td>
+                                                <td style={{fontFamily: 'JetBrains Mono'}}>{item.lowerBound}</td>
+                                                <td style={{fontFamily: 'JetBrains Mono'}}>{item.upperBound}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <div className="alert alert-success">
+                                ✓ No outliers detected using IQR method
+                            </div>
+                        )}
+                    </div>
+                );
+            };
+
+            // Render configuration panels
+            const renderConfig = () => {
+                const toolName = toolsConfig[category]?.tools.find(t => t.id === tool)?.name || tool;
+
+                if (['overview', 'statistics', 'missing', 'correlation', 'distribution', 'outliers'].includes(tool)) {
+                    return null; // These are view-only tools
+                }
+
+                return (
+                    <div className="config-panel">
+                        <h4>⚙️ Configure {toolName}</h4>
+                        
+                        {['mean', 'median', 'mode', 'constant', 'ffill', 'bfill'].includes(tool) && (
+                            <>
+                                <div className="form-group">
+                                    <label>Select Column</label>
+                                    <select value={config.column || ''} onChange={e => setConfig({...config, column: e.target.value})}>
+                                        <option value="">Choose a column...</option>
+                                        {getColumns().map(col => (
+                                            <option key={col} value={col}>{col}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                {tool === 'constant' && (
+                                    <div className="form-group">
+                                        <label>Fill Value</label>
+                                        <input 
+                                            type="text" 
+                                            value={config.value || ''} 
+                                            onChange={e => setConfig({...config, value: e.target.value})}
+                                            placeholder="Enter constant value"
+                                        />
+                                    </div>
+                                )}
+                            </>
+                        )}
+
+                        {['label', 'onehot', 'ordinal', 'target', 'binary', 'frequency'].includes(tool) && (
+                            <div className="form-group">
+                                <label>Select Categorical Column</label>
+                                <select value={config.column || ''} onChange={e => setConfig({...config, column: e.target.value})}>
+                                    <option value="">Choose a column...</option>
+                                    {getCategoricalColumns().map(col => (
+                                        <option key={col} value={col}>{col}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+
+                        {['standard', 'minmax', 'robust', 'maxabs', 'normalizer'].includes(tool) && (
+                            <div className="form-group">
+                                <label>Select Columns to Scale</label>
+                                <div className="checkbox-group">
+                                    {getNumericColumns().map(col => (
+                                        <label key={col} className="checkbox-label">
+                                            <input 
+                                                type="checkbox"
+                                                checked={(config.columns || []).includes(col)}
+                                                onChange={e => {
+                                                    const cols = config.columns || [];
+                                                    setConfig({
+                                                        ...config,
+                                                        columns: e.target.checked 
+                                                            ? [...cols, col]
+                                                            : cols.filter(c => c !== col)
+                                                    });
+                                                }}
+                                            />
+                                            {col}
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {['log', 'sqrt', 'power', 'boxcox', 'yeojohnson'].includes(tool) && (
+                            <div className="form-group">
+                                <label>Select Columns to Transform</label>
+                                <div className="checkbox-group">
+                                    {getNumericColumns().map(col => (
+                                        <label key={col} className="checkbox-label">
+                                            <input 
+                                                type="checkbox"
+                                                checked={(config.columns || []).includes(col)}
+                                                onChange={e => {
+                                                    const cols = config.columns || [];
+                                                    setConfig({
+                                                        ...config,
+                                                        columns: e.target.checked 
+                                                            ? [...cols, col]
+                                                            : cols.filter(c => c !== col)
+                                                    });
+                                                }}
+                                            />
+                                            {col}
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="action-buttons">
+                            <button className="btn" onClick={applyTool}>
+                                ✨ Apply Transformation
+                            </button>
+                        </div>
+
+                        {result && (
+                            <div className={`alert alert-${result.type}`}>
+                                {result.message}
+                            </div>
+                        )}
+                    </div>
+                );
+            };
+
+            return (
+                <div>
+                    {renderConfig()}
+                    {['overview', 'statistics', 'missing', 'correlation', 'distribution', 'outliers'].includes(tool) && applyTool()}
+                    <DataPreview data={data} />
+                </div>
+            );
+        }
+
+        function AIAgent({ isOpen, onClose, data, onApplyTool }) {
+            const [messages, setMessages] = useState([{
+                role: 'ai',
+                content: 'Hello! I\'m your AI preprocessing assistant. I can help you:\n\n• Analyze your dataset and identify issues\n• Suggest appropriate preprocessing steps\n• Explain different techniques\n• Recommend a complete preprocessing pipeline\n\nWhat would you like help with?',
+                suggestions: [
+                    'Analyze my dataset',
+                    'What preprocessing do I need?',
+                    'Handle missing values',
+                    'Suggest feature engineering'
+                ]
+            }]);
+            const [input, setInput] = useState('');
+            const [loading, setLoading] = useState(false);
+            const messagesEndRef = useRef(null);
+
+            const scrollToBottom = () => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            };
+
+            useEffect(() => {
+                scrollToBottom();
+            }, [messages]);
+
+            const analyzeDataset = () => {
+                if (!data || data.length === 0) return 'No data available';
+
+                const columns = Object.keys(data[0] || {});
+                const numRows = data.length;
+                
+                const analysis = {
+                    rows: numRows,
+                    columns: columns.length,
+                    columnDetails: []
+                };
+
+                columns.forEach(col => {
+                    const values = data.map(row => row[col]);
+                    const nonNull = values.filter(v => v !== null && v !== undefined && v !== '');
+                    const missing = values.length - nonNull.length;
+                    const unique = new Set(values).size;
+                    const isNumeric = nonNull.some(v => typeof v === 'number');
+                    
+                    let stats = {};
+                    if (isNumeric) {
+                        const nums = nonNull.filter(v => typeof v === 'number');
+                        const mean = nums.reduce((a, b) => a + b, 0) / nums.length;
+                        stats = {
+                            mean: mean.toFixed(2),
+                            min: Math.min(...nums).toFixed(2),
+                            max: Math.max(...nums).toFixed(2)
+                        };
+                    }
+
+                    analysis.columnDetails.push({
+                        name: col,
+                        type: isNumeric ? 'numeric' : 'categorical',
+                        missing,
+                        missingPct: ((missing / values.length) * 100).toFixed(1),
+                        unique,
+                        ...stats
+                    });
+                });
+
+                return JSON.stringify(analysis, null, 2);
+            };
+
+            const sendMessage = async (messageText) => {
+                if (!messageText.trim() || loading) return;
+
+                const userMessage = { role: 'user', content: messageText };
+                setMessages(prev => [...prev, userMessage]);
+                setInput('');
+                setLoading(true);
+
+                try {
+                    const datasetContext = analyzeDataset();
+                    
+                    const systemPrompt = `You are an expert data preprocessing assistant. You help users understand and apply data preprocessing techniques.
+
+Available preprocessing tools:
+1. EDA: Overview, Statistics, Missing Values Analysis, Correlation, Distribution, Outliers
+2. Imputation: Mean, Median, Mode, Constant, Forward Fill, Backward Fill, KNN, Iterative
+3. Encoding: Label, One-Hot, Ordinal, Target, Binary, Frequency
+4. Scaling: Standard, MinMax, Robust, MaxAbs, Normalizer
+5. Transformation: Log, Square Root, Power, Box-Cox, Yeo-Johnson
+6. Feature Creation: Polynomial, Interaction, Binning, DateTime, Aggregation
+7. Feature Selection: Variance Threshold, Correlation Filter, Univariate, RFE
+8. Cleaning: Remove Duplicates, Handle Outliers, Type Conversion, Rename, Filter Rows
+
+Current dataset analysis:
+${datasetContext}
+
+Provide specific, actionable recommendations. Be concise but thorough. When suggesting specific tools, mention them by name from the available tools list above.`;
+
+                    const response = await fetch('https://api.anthropic.com/v1/messages', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            model: 'claude-sonnet-4-20250514',
+                            max_tokens: 1000,
+                            system: systemPrompt,
+                            messages: [
+                                ...messages.filter(m => m.role !== 'ai' || !m.suggestions).map(m => ({
+                                    role: m.role === 'ai' ? 'assistant' : 'user',
+                                    content: m.content
+                                })),
+                                { role: 'user', content: messageText }
+                            ]
+                        })
+                    });
+
+                    const result = await response.json();
+                    const aiResponse = result.content.find(c => c.type === 'text')?.text || 'Sorry, I encountered an error.';
+
+                    // Extract tool suggestions from the response
+                    const suggestions = [];
+                    if (aiResponse.toLowerCase().includes('missing') || aiResponse.toLowerCase().includes('imputation')) {
+                        suggestions.push('Show imputation options');
+                    }
+                    if (aiResponse.toLowerCase().includes('scaling') || aiResponse.toLowerCase().includes('normalization')) {
+                        suggestions.push('Show scaling methods');
+                    }
+                    if (aiResponse.toLowerCase().includes('encoding') || aiResponse.toLowerCase().includes('categorical')) {
+                        suggestions.push('Show encoding options');
+                    }
+
+                    setMessages(prev => [...prev, { 
+                        role: 'ai', 
+                        content: aiResponse,
+                        suggestions: suggestions.length > 0 ? suggestions : ['Tell me more', 'Next steps?']
+                    }]);
+                } catch (error) {
+                    console.error('AI Error:', error);
+                    setMessages(prev => [...prev, { 
+                        role: 'ai', 
+                        content: 'I apologize, but I encountered an error. Please try again or ask a different question.'
+                    }]);
+                }
+
+                setLoading(false);
+            };
+
+            const handleSuggestionClick = (suggestion) => {
+                if (suggestion.includes('imputation') || suggestion.includes('Imputation')) {
+                    onApplyTool('imputation', 'mean');
+                } else if (suggestion.includes('scaling') || suggestion.includes('Scaling')) {
+                    onApplyTool('scaling', 'standard');
+                } else if (suggestion.includes('encoding') || suggestion.includes('Encoding')) {
+                    onApplyTool('encoding', 'label');
+                } else {
+                    sendMessage(suggestion);
+                }
+            };
+
+            return (
+                <div className={`ai-chat-panel ${isOpen ? 'open' : ''}`}>
+                    <div className="ai-chat-header">
+                        <h3>🤖 AI Assistant</h3>
+                        <button className="close-chat" onClick={onClose}>×</button>
+                    </div>
+
+                    <div className="ai-chat-messages">
+                        {messages.map((msg, idx) => (
+                            <div key={idx} className={`message ${msg.role}`}>
+                                <div className="message-avatar">
+                                    {msg.role === 'user' ? '👤' : '🤖'}
+                                </div>
+                                <div className="message-content">
+                                    {msg.content.split('\n').map((line, i) => (
+                                        <div key={i}>{line || <br />}</div>
+                                    ))}
+                                    {msg.suggestions && (
+                                        <div className="suggestion-chips">
+                                            {msg.suggestions.map((suggestion, i) => (
+                                                <div 
+                                                    key={i} 
+                                                    className="suggestion-chip"
+                                                    onClick={() => handleSuggestionClick(suggestion)}
+                                                >
+                                                    {suggestion}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                        {loading && (
+                            <div className="message ai">
+                                <div className="message-avatar">🤖</div>
+                                <div className="message-content">
+                                    <div className="typing-indicator">
+                                        <div className="typing-dot"></div>
+                                        <div className="typing-dot"></div>
+                                        <div className="typing-dot"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        <div ref={messagesEndRef} />
+                    </div>
+
+                    <div className="ai-chat-input">
+                        <textarea
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            onKeyPress={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    sendMessage(input);
+                                }
+                            }}
+                            placeholder="Ask about preprocessing techniques..."
+                            disabled={loading}
+                        />
+                        <button 
+                            className="send-button" 
+                            onClick={() => sendMessage(input)}
+                            disabled={loading || !input.trim()}
+                        >
+                            ➤
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        function DataPreview({ data }) {
+            const [page, setPage] = useState(0);
+            const rowsPerPage = 10;
+            const totalPages = Math.ceil(data.length / rowsPerPage);
+            const displayData = data.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
+            const columns = Object.keys(data[0] || {});
+
+            return (
+                <div style={{marginTop: '2rem'}}>
+                    <h4 style={{marginBottom: '1rem', color: 'var(--primary)'}}>📄 Data Preview</h4>
+                    <div className="table-container" style={{maxHeight: '400px', overflow: 'auto'}}>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    {columns.map(col => <th key={col}>{col}</th>)}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {displayData.map((row, idx) => (
+                                    <tr key={idx}>
+                                        <td style={{fontWeight: '600', color: 'var(--primary)'}}>{page * rowsPerPage + idx + 1}</td>
+                                        {columns.map(col => (
+                                            <td key={col}>
+                                                {row[col] === null || row[col] === undefined || row[col] === '' 
+                                                    ? <span style={{color: 'var(--error)', fontStyle: 'italic'}}>null</span>
+                                                    : String(row[col])}
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style={{display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '1rem', alignItems: 'center'}}>
+                        <button 
+                            className="btn btn-secondary" 
+                            onClick={() => setPage(Math.max(0, page - 1))}
+                            disabled={page === 0}
+                        >
+                            ← Previous
+                        </button>
+                        <span style={{color: 'var(--text-secondary)'}}>
+                            Page {page + 1} of {totalPages}
+                        </span>
+                        <button 
+                            className="btn btn-secondary" 
+                            onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+                            disabled={page === totalPages - 1}
+                        >
+                            Next →
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<DataPreprocessingToolkit />, document.getElementById('root'));
+    </script>
+</body>
+</html>
